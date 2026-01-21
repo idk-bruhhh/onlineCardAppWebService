@@ -43,18 +43,23 @@ app.get('/allcards', async (req, res) => {
 // ADD a card
 app.post('/addcard', async (req, res) => {
     const { card_name, card_pic } = req.body;
-    let connection;
 
+    // ✅ validation (IMPORTANT)
+    if (!card_name || !card_pic) {
+        return res.status(400).json({ message: 'Missing card_name or card_pic' });
+    }
+
+    let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
         await connection.execute(
             'INSERT INTO cards (card_name, card_pic) VALUES (?, ?)',
             [card_name, card_pic]
         );
-        res.status(201).json({ message: `Card ${card_name} added successfully` });
+        res.status(201).json({ message: 'Card added successfully' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Server error - could not add card' });
+        res.status(500).json({ message: 'Database error' });
     } finally {
         if (connection) await connection.end();
     }
@@ -64,18 +69,18 @@ app.post('/addcard', async (req, res) => {
 app.put('/updatecard/:id', async (req, res) => {
     const { id } = req.params;
     const { card_name, card_pic } = req.body;
-    let connection;
 
+    let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
         await connection.execute(
             'UPDATE cards SET card_name = ?, card_pic = ? WHERE id = ?',
             [card_name, card_pic, id]
         );
-        res.json({ message: `Card ${id} updated successfully` });
+        res.json({ message: 'Card updated successfully' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Server error - could not update card' });
+        res.status(500).json({ message: 'Database error' });
     } finally {
         if (connection) await connection.end();
     }
@@ -84,18 +89,18 @@ app.put('/updatecard/:id', async (req, res) => {
 // DELETE a card
 app.delete('/deletecard/:id', async (req, res) => {
     const { id } = req.params;
-    let connection;
 
+    let connection;
     try {
         connection = await mysql.createConnection(dbConfig);
         await connection.execute(
             'DELETE FROM cards WHERE id = ?',
             [id]
         );
-        res.json({ message: `Card ${id} deleted successfully` });
+        res.json({ message: 'Card deleted successfully' });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ message: 'Server error - could not delete card' });
+        res.status(500).json({ message: 'Database error' });
     } finally {
         if (connection) await connection.end();
     }
